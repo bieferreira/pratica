@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import { login, getTasks } from './api';
+import React, { useEffect, useState } from 'react';
+import { login, getTasks, createTask, updateTask, deleteTask } from './api';
+import TaskForm from './components/TaskForm';
+import TaskList from './components/TaskList';
 
 function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [token, setToken] = useState('');
   const [tasks, setTasks] = useState([]);
+const [selectedTask, setSelectedTask] = useState(null);
 
   const handleLogin = async () => {
     
@@ -31,22 +34,66 @@ function App() {
 
   };
 
+  const loadTasks = async () => {
+      const res = await getTasks();
+      setTasks(res.data);
+    };
+  
+    useEffect(() => {
+      loadTasks();
+    }, []);
+  
+  const handleSave = async task => {
+      if (task.id) {
+        await updateTask(task.id, task);
+      } else {
+        await createTask(task);
+      }
+      loadTasks();
+    };
+  
+    const handleDelete = async id => {
+      await deleteTask(id);
+      loadTasks();
+    };
+  
   return (
     <div className="App">
-      <h1>Login</h1>
-      <input placeholder="Email" value={email} onChange={e => setEmail('joao@email.com')} />
-      <input placeholder="Senha" type="password" value={password} onChange={e => setPassword('123456')} />
-      <button onClick={handleLogin}>Entrar</button>
+      {!token && (
+        <>
+          <div className="container py-4">
+            <div className="mb-3">
+              <h1>Login</h1>
+              <label className="form-label">Usuário</label>
+              <input
+                className="form-control"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail('joao@email.com')}
+              />
+              <label className="form-label">Senha</label>
+              <input
+                className="form-control"
+                placeholder="Senha"
+                type="password"
+                value={password}
+                onChange={e => setPassword('123456')}
+              />
+              <br />
+              <div className="d-flex justify-content-center">
+                <button className="btn btn-primary" onClick={handleLogin}>Entrar</button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {token && (
-        <>
-          <h2>Tarefas</h2>
-          <ul>
-            {tasks.map(t => (
-              <li key={t.id}>{t.title} - {t.status}</li>
-            ))}
-          </ul>
-        </>
+        <div className="container py-4">
+          <h1 className="mb-4">Gerenciador de Tarefas</h1>
+          <TaskForm onSave={handleSave} selectedTask={selectedTask} clearSelected={() => setSelectedTask(null)} />
+          <TaskList tasks={tasks} onEdit={setSelectedTask} onDelete={handleDelete} />
+        </div>
       )}
     </div>
   );

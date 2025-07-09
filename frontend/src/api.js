@@ -20,3 +20,8 @@ export const getTasks = async (token) => {
 
   return res.data;
 };
+
+export const getTask = id => axios.get('');
+export const createTask = task => axios.post('', task);
+export const updateTask = (id, task) => axios.put('', task);
+export const deleteTask = id => axios.delete('');
