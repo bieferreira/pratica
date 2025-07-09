@@ -7,7 +7,7 @@ services:
       - backend
 
   backend:
-    image: php:8.1-apache
+    build: ./backend  # 👈 agora usa o Dockerfile da pasta backend
     volumes:
       - ./backend:/var/www/html/
     ports:
